@@ -160,8 +160,7 @@ class Board
 
 	def draw_board
 		@board_array.each do |line|
-			print line
-			print "\n"
+			 line << "\n"
 		end
 	end
 end
@@ -193,11 +192,6 @@ f_pairs.each do |cmd_pair|
 	cmd, arg = cmd_pair
 	turtle.send(cmd, arg.to_i)
 end
-
-	# turtle.to_s.each_slice(board_size) {|x|
-	# 	print x
-	# 	print "\n"
-	# }
 
 out_file = File.open("simple_out.txt", "w")
 out_file.write turtle.board.draw_board
