@@ -215,52 +215,6 @@ class Board
   end
 end
 
-class Parser
-
-  def initialize(file_name)
-
-    # Open the input file
-    f = File.open(file_name)
-
-    # After opening the file put each line into an array
-    f_array_of_lines = f.readlines
-    @board_size = f_array_of_lines[0].to_i
-    
-    # Shift down two lines to work with the files commands
-    f_array_of_lines.shift(2)
-    f_string = f_array_of_lines.to_s
-
-    # Run a check to see if the word "REPEAT" is present
-    # If present, isolate the number of times to repeat 
-    # clone the commands that need to be repeated
-    if f_string.include?("REPEAT")
-	    n = f_string[/REPEAT ([0-9]*)/][$1].to_i
-	    repeat_commands_string = f_string[/\[([A-Z0-9 ]*)\]/]
-	    repeat_commands_string = repeat_commands_string[$1].lstrip.to_s * n
-      f_string = f_string.gsub(/^REPEAT \d* \[[a-zA-Z0-9 ]*\]$/, repeat_commands_string)
-    end
-  
-    # Remove line breaks and split the string into an array around breaks
-    f_string = f_string.gsub(/\n/, ' ')
-    f_array = f_string.split(' ')
-  
-    # Create a multi-dim array so that each element is a command
-    @f_pairs = []
-    f_array.each_slice(2) do |x,y|
-	  @f_pairs << [x,y]
-    end
-  end
-
-  def get_board_size
-    @board_size
-  end
-
-  def get_command_pairs
-    @f_pairs
-  end
-
-end
-
 
 parsed_file = Parser.new("complex.logo")
 board_size = parsed_file.get_board_size
