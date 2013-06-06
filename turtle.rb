@@ -1,3 +1,49 @@
+class Parser
+
+  def initialize(file_name)
+
+    # Open the input file
+    f = File.open(file_name)
+
+    # After opening the file put each line into an array
+    f_array_of_lines = f.readlines
+    @board_size = f_array_of_lines[0].to_i
+    
+    # Shift down two lines to work with the files commands
+    f_array_of_lines.shift(2)
+    f_string = f_array_of_lines.to_s
+
+    # Run a check to see if the word "REPEAT" is present
+    # If present, isolate the number of times to repeat 
+    # clone the commands that need to be repeated
+    if f_string.include?("REPEAT")
+	    n = f_string[/REPEAT ([0-9]*)/][$1].to_i
+	    repeat_commands_string = f_string[/\[([A-Z0-9 ]*)\]/]
+	    repeat_commands_string = repeat_commands_string[$1].lstrip.to_s * n
+      f_string = f_string.gsub(/^REPEAT \d* \[[a-zA-Z0-9 ]*\]$/, repeat_commands_string)
+    end
+  
+    # Remove line breaks and split the string into an array around breaks
+    f_string = f_string.gsub(/\n/, ' ')
+    f_array = f_string.split(' ')
+  
+    # Create a multi-dim array so that each element is a command
+    @f_pairs = []
+    f_array.each_slice(2) do |x,y|
+	  @f_pairs << [x,y]
+    end
+  end
+
+  def get_board_size
+    @board_size
+  end
+
+  def get_command_pairs
+    @f_pairs
+  end
+
+end
+
 class Turtle
 
 	attr_reader :board
@@ -10,9 +56,16 @@ class Turtle
 		@board.visit(@y, @x)
 	end
 
+  def receive_commands(command_pairs)
+    command_pairs.each do |cmd_pair|
+	  cmd, arg = cmd_pair
+	  self.send(cmd, arg.to_i)
+    end
+  end
+
 	def FD (steps)
 
-		if @orientation == 0 || @orientation == 360
+		if (@orientation == 0 || @orientation == 360)
 			steps.times do
 				@y = @y - 1
 				@board.visit(@y, @x)
@@ -57,7 +110,7 @@ class Turtle
 				@board.visit(@y, @x)
 			end
 
-		else @orientation == 315
+    elsif @orientation == 315
 			steps.times do
 				@y = @y - 1
 				@x = @x - 1
@@ -67,7 +120,7 @@ class Turtle
 	end
 
 	def BK (steps)
-		if @orientation == 0 || @orientation == 360
+		if (@orientation == 0 || @orientation == 360)
 			steps.times do
 				@y = @y + 1
 				@board.visit(@y, @x)
@@ -112,7 +165,7 @@ class Turtle
 				@board.visit(@y, @x)
 			end
 
-		else @orientation == 315
+    elsif @orientation == 315
 			steps.times do
 				@y = @y + 1
 				@x = @x + 1
@@ -134,16 +187,11 @@ class Turtle
 		if degrees%45 == 0
 			@orientation = @orientation - degrees
 		end
-		if @orientation >= 360
-			@orientation = @orientation - 360
+		if @orientation <= 0
+			@orientation = @orientation + 360
 		end
 	end
 
-	def REPEAT(some_method, iterations)
-		iterations.times do
-			some_method
-		end
-	end
 end
 
 class Board
@@ -151,47 +199,73 @@ class Board
 	def initialize (turtle, board_size)
 		@turtle = turtle
 		@board_size = board_size
-		@board_array = Array.new(@board_size, " .") {Array.new(@board_size, " .")}
+		@board_array = Array.new(@board_size, ". ") {Array.new(@board_size, ". ")}
 	end
 
 	def visit(y, x)
-		@board_array[y][x] = " X"
+		@board_array[y][x] = "X "
 	end
 
-	def draw_board
-		@board_array.each do |line|
-			 line << "\n"
-		end
-	end
+  def write_board(file_name)
+    out_file = File.open(file_name, "w")
+    @board_array.each do |line|
+      out_file.write line
+      out_file.write "\n"
+    end
+  end
 end
 
-f = File.open('simple.logo')
-f_lines = f.readlines
-board_size = f_lines[0].to_i
-f_lines.shift(2)
-f_string = f_lines.to_s
-if f_string.include?("REPEAT")
-	n = f_string[/REPEAT ([0-9]*)/][$1].to_i
-	y_string = f_string[/\[([A-Z0-9 ]*)\]/]
-	y_string = y_string[$1].lstrip.to_s * n
+class Parser
+
+  def initialize(file_name)
+
+    # Open the input file
+    f = File.open(file_name)
+
+    # After opening the file put each line into an array
+    f_array_of_lines = f.readlines
+    @board_size = f_array_of_lines[0].to_i
+    
+    # Shift down two lines to work with the files commands
+    f_array_of_lines.shift(2)
+    f_string = f_array_of_lines.to_s
+
+    # Run a check to see if the word "REPEAT" is present
+    # If present, isolate the number of times to repeat 
+    # clone the commands that need to be repeated
+    if f_string.include?("REPEAT")
+	    n = f_string[/REPEAT ([0-9]*)/][$1].to_i
+	    repeat_commands_string = f_string[/\[([A-Z0-9 ]*)\]/]
+	    repeat_commands_string = repeat_commands_string[$1].lstrip.to_s * n
+      f_string = f_string.gsub(/^REPEAT \d* \[[a-zA-Z0-9 ]*\]$/, repeat_commands_string)
+    end
+  
+    # Remove line breaks and split the string into an array around breaks
+    f_string = f_string.gsub(/\n/, ' ')
+    f_array = f_string.split(' ')
+  
+    # Create a multi-dim array so that each element is a command
+    @f_pairs = []
+    f_array.each_slice(2) do |x,y|
+	  @f_pairs << [x,y]
+    end
+  end
+
+  def get_board_size
+    @board_size
+  end
+
+  def get_command_pairs
+    @f_pairs
+  end
+
 end
 
-f_string = f_string.gsub(/^REPEAT \d* \[[a-zA-Z0-9 ]*\]$/, y_string)
-f_string = f_string.gsub(/\n/, " ")
-f_string = f_string.split(' ')
 
-
-f_pairs = []
-f_string.each_slice(2) do |x,y|
-	f_pairs << [x,y]
-end
+parsed_file = Parser.new("complex.logo")
+board_size = parsed_file.get_board_size
+command_pairs = parsed_file.get_command_pairs
 
 turtle = Turtle.new(board_size)
-
-f_pairs.each do |cmd_pair|
-	cmd, arg = cmd_pair
-	turtle.send(cmd, arg.to_i)
-end
-
-out_file = File.open("simple_out.txt", "w")
-out_file.write turtle.board.draw_board
+turtle.receive_commands(command_pairs)
+turtle.board.write_board("complex_out.txt")
