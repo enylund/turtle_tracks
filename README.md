@@ -1,6 +1,6 @@
 Puzzle Node: Turtle Tracks
 =============
 
-Natalia Dashan
-Eric Nylund
+Natalia Dashan /
+Eric Nylund /
 Will Zhao
