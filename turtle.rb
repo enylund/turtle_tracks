@@ -3,37 +3,38 @@ class Parser
   def initialize(file_name)
 
     # Open the input file and add each line to an array
-    f = File.open(file_name)
-    f_array_of_lines = f.readlines
+    file = File.open(file_name)
+    file_array_of_lines = file.readlines
 
     # Grab the first line which is always the size of the board
-    @board_size = f_array_of_lines[0].to_i
+    @board_size = file_array_of_lines[0].to_i
 
     # Shift down two lines to get the commands for turtle
-    f_array_of_lines.shift(2)
-    f_string = f_array_of_lines.to_s
+    file_array_of_lines.shift(2)
+    file_string = file_array_of_lines.to_s
 
     # Run a check to see if the word "REPEAT" is present
     # If present, isolate the number of times to repeat
     # clone the commands that need to be repeated
-    if f_string.include?("REPEAT")
-	    n = f_string[/REPEAT ([0-9]*)/][$1].to_i
-	    repeat_commands_string = f_string[/\[([A-Z0-9 ]*)\]/]
-	    repeat_commands_string = repeat_commands_string[$1].lstrip.to_s * n
-      f_string = f_string.gsub(/^REPEAT \d* \[[a-zA-Z0-9 ]*\]$/, repeat_commands_string)
+    if file_string.include?("REPEAT")
+	    number_of_repeats = file_string[/REPEAT ([0-9]*)/][$1].to_i
+	    repeat_commands_string = file_string[/\[([A-Z0-9 ]*)\]/]
+	    repeat_commands_string = repeat_commands_string[$1].lstrip.to_s * number_of_repeats
+      file_string = file_string.gsub(/^REPEAT \d* \[[a-zA-Z0-9 ]*\]$/, repeat_commands_string)
     end
 
     # Remove line breaks and split the string into an array around spaces
-    f_string = f_string.gsub(/\n/, ' ')
-    f_array = f_string.split(' ')
+    file_string = file_string.gsub(/\n/, ' ')
+    file_array = file_string.split(' ')
 
     # Create a multi-dimensional array with each element as a command for turtle
     @f_pairs = []
-    f_array.each_slice(2) do |x,y|
+    file_array.each_slice(2) do |x,y|
 	  @f_pairs << [x,y]
     end
   end
 
+  # Getter functions for the board size and command pairs
   def get_board_size
     @board_size
   end
@@ -48,6 +49,7 @@ class Turtle
 
 	attr_reader :board
 
+  # Initializations for a turtle that place it at the center of the board
 	def initialize(board_size)
 		@board = Board.new(self, board_size)
 		@y = board_size/2
@@ -56,6 +58,8 @@ class Turtle
 		@board.visit(@y, @x)
 	end
 
+  # Function to send parsed commands to the turtles functions
+  # Makes use of send() function.
   def receive_commands(command_pairs)
     command_pairs.each do |cmd_pair|
 	  cmd, arg = cmd_pair
@@ -63,6 +67,7 @@ class Turtle
     end
   end
 
+  # Funtions for movement and orientation of the turtle.
 	def FD (steps)
     move_mapping = { 0 => [-1, 0],
                      45 => [-1, 1],
@@ -104,35 +109,38 @@ class Turtle
 
 	def RT(degrees)
 		if degrees%45 == 0
-			@orientation = @orientation + degrees
+			@orientation += degrees
 		end
 		if @orientation >= 360
-			@orientation = @orientation - 360
+			@orientation -= 360
 		end
 	end
 
 	def LT(degrees)
 		if degrees%45 == 0
-			@orientation = @orientation - degrees
+			@orientation -= degrees
 		end
 		if @orientation <= 0
-			@orientation = @orientation + 360
+			@orientation += 360
 		end
 	end
 end
 
 class Board
 
+  # New boards are initialized as multidimensional arrays (with y,x coordinates) 
 	def initialize (turtle, board_size)
 		@turtle = turtle
 		@board_size = board_size
 		@board_array = Array.new(@board_size, ". ") {Array.new(@board_size, ". ")}
 	end
 
+  # Function to draw Xs on each square the turtle passes
 	def visit(y, x)
 		@board_array[y][x] = "X "
 	end
 
+  # Function to output the file for viewing.
   def write_board(file_name)
     out_file = File.open(file_name, "w")
     @board_array.each do |line|
