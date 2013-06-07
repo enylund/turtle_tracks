@@ -1,6 +1,6 @@
-turtle_tracks
+Puzzle Node: Turtle Tracks
 =============
 
-eric.nylund@yale.edu  
-nataliadashan@gmail.com  
-will.zhao09@gmail.com
+Natalia Dashan
+Eric Nylund
+Will Zhao
