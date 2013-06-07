@@ -2,19 +2,19 @@ class Parser
 
   def initialize(file_name)
 
-    # Open the input file
+    # Open the input file and add each line to an array
     f = File.open(file_name)
-
-    # After opening the file put each line into an array
     f_array_of_lines = f.readlines
+
+    # Grab the first line which is always the size of the board
     @board_size = f_array_of_lines[0].to_i
-    
-    # Shift down two lines to work with the files commands
+
+    # Shift down two lines to get the commands for turtle
     f_array_of_lines.shift(2)
     f_string = f_array_of_lines.to_s
 
     # Run a check to see if the word "REPEAT" is present
-    # If present, isolate the number of times to repeat 
+    # If present, isolate the number of times to repeat
     # clone the commands that need to be repeated
     if f_string.include?("REPEAT")
 	    n = f_string[/REPEAT ([0-9]*)/][$1].to_i
@@ -22,12 +22,12 @@ class Parser
 	    repeat_commands_string = repeat_commands_string[$1].lstrip.to_s * n
       f_string = f_string.gsub(/^REPEAT \d* \[[a-zA-Z0-9 ]*\]$/, repeat_commands_string)
     end
-  
-    # Remove line breaks and split the string into an array around breaks
+
+    # Remove line breaks and split the string into an array around spaces
     f_string = f_string.gsub(/\n/, ' ')
     f_array = f_string.split(' ')
-  
-    # Create a multi-dim array so that each element is a command
+
+    # Create a multi-dimensional array with each element as a command for turtle
     @f_pairs = []
     f_array.each_slice(2) do |x,y|
 	  @f_pairs << [x,y]
@@ -64,114 +64,42 @@ class Turtle
   end
 
 	def FD (steps)
+    move_mapping = { 0 => [-1, 0],
+                     45 => [-1, 1],
+                     90 => [0, 1],
+                     135 => [1, 1],
+                     180 => [1, 0],
+                     225 => [1, -1],
+                     270 => [0, -1],
+                     315 => [-1, -1],
+                     360 => [-1, 0]
+                   }
 
-		if (@orientation == 0 || @orientation == 360)
 			steps.times do
-				@y = @y - 1
+				@y += move_mapping[@orientation][0]
+				@x += move_mapping[@orientation][1]
 				@board.visit(@y, @x)
 			end
 
-		elsif @orientation == 45
-			steps.times do
-				@y = @y - 1
-				@x = @x + 1
-				@board.visit(@y, @x)
-			end
-
-		elsif @orientation == 90
-			steps.times do
-				@x = @x + 1
-				@board.visit(@y, @x)
-			end
-
-		elsif @orientation == 135
-			steps.times do
-				@y = @y + 1
-				@x = @x + 1
-				@board.visit(@y, @x)
-			end
-
-		elsif @orientation == 180
-			steps.times do
-				@y = @y + 1
-				@board.visit(@y, @x)
-			end
-
-		elsif @orientation == 225
-			steps.times do
-				@y = @y + 1
-				@x = @x - 1
-				@board.visit(@y, @x)
-			end
-
-		elsif @orientation == 270
-			steps.times do
-				@x = @x - 1
-				@board.visit(@y, @x)
-			end
-
-    elsif @orientation == 315
-			steps.times do
-				@y = @y - 1
-				@x = @x - 1
-				@board.visit(@y, @x)
-			end
-		end
 	end
 
 	def BK (steps)
-		if (@orientation == 0 || @orientation == 360)
-			steps.times do
-				@y = @y + 1
-				@board.visit(@y, @x)
-			end
+     move_mapping = { 0 => [1, 0],
+                     45 => [1, -1],
+                     90 => [0, -1],
+                     135 => [-1, -1],
+                     180 => [-1, 0],
+                     225 => [-1, 1],
+                     270 => [0, 1],
+                     315 => [1, 1],
+                     360 => [1, 0]
+                   }
 
-		elsif @orientation == 45
 			steps.times do
-				@y = @y + 1
-				@x = @x - 1
+				@y += move_mapping[@orientation][0]
+				@x += move_mapping[@orientation][1]
 				@board.visit(@y, @x)
 			end
-
-		elsif @orientation == 90
-			steps.times do
-				@x = @x - 1
-				@board.visit(@y, @x)
-			end
-
-		elsif @orientation == 135
-			steps.times do
-				@y = @y - 1
-				@x = @x - 1
-				@board.visit(@y, @x)
-			end
-
-		elsif @orientation == 180
-			steps.times do
-				@y = @y - 1
-				@board.visit(@y, @x)
-			end
-
-		elsif @orientation == 225
-			steps.times do
-				@y = @y - 1
-				@x = @x + 1
-				@board.visit(@y, @x)
-			end
-
-		elsif @orientation == 270
-			steps.times do
-				@x = @x + 1
-				@board.visit(@y, @x)
-			end
-
-    elsif @orientation == 315
-			steps.times do
-				@y = @y + 1
-				@x = @x + 1
-				@board.visit(@y, @x)
-			end
-		end
 	end
 
 	def RT(degrees)
@@ -191,7 +119,6 @@ class Turtle
 			@orientation = @orientation + 360
 		end
 	end
-
 end
 
 class Board
